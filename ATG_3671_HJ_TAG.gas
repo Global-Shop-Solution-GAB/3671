@@ -1,0 +1,48 @@
+Program.Sub.ScreenSU.Start
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'HJ ENTERPRISES PRODUCTION TAG
+'RUNS OFF HOOK 15880 AND REPORT HJTAG.RPT
+
+V.Local.PARMS.Declare(String)
+V.Local.values.Declare(String)
+V.Local.ReportPath.Declare(String)
+V.Local.reportid.Declare(Long)
+V.Local.dept.Declare(String)
+V.Local.sSQL.Declare(String)
+
+F.Intrinsic.String.Split("PART*!*QTY*!*NAME*!*DEPT*!*WC","*!*",V.Local.parms)
+
+F.Intrinsic.String.Concat(V.Caller.PluginsDir,"\GAB\GAS\HJTAG.rpt",V.Local.ReportPath)
+F.Global.BI.InitializeReport("HJ PRODUCTION TAG",V.Local.ReportPath,V.Local.ReportID)
+
+F.ODBC.Connection!conx.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass)
+
+F.Intrinsic.String.Concat("Select EMPLOYEE,DEPT_EMPLOYEE FROM V_EMPLOYEE_MSTR Where EMPLOYEE='",V.Passed.009011.Trim,"' ",V.Local.sSQL)
+F.ODBC.Connection!conx.OpenRecordsetRO("rstEMP",V.Local.sSQL)
+
+F.Intrinsic.Control.If(V.ODBC.conx!rstEMP.EOF,=,False)
+	V.Local.dept.Set(V.ODBC.conx!rstEMP.FieldValTrim!DEPT_EMPLOYEE)
+F.Intrinsic.Control.EndiF
+F.ODBC.conx!rstEMP.Close
+F.ODBC.Connection!conx.Close
+
+F.Intrinsic.String.Concat(V.Passed.009002,"*!*",V.Passed.000001,"*!*",V.Passed.009012,"*!*",V.LOCAL.dept,"*!*",V.Passed.009000,V.Local.values)
+F.Intrinsic.String.Split(V.Local.values,"*!*",V.Local.values)
+F.Global.BI.PrintReport(V.Local.reportid,2,V.Local.PARMS,V.Local.values,True)
+
+
+
+Program.Sub.Main.End
+
+Program.Sub.Comments.Start
+${$0$}$ATG_3671_HJ_TAG$}$RLK$}$4/1/2016
+${$1$}$$}$$}$0$}$15880$}$OLS003-PB-PROCESS-PRE-HOOK (On-line GUI)$}$4/1/2016 3:25:26 PM$}$(Program: OLG002; Screen: OLS003)
+
+Program.Sub.Comments.End
+
